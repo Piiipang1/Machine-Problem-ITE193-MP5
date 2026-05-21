@@ -14,7 +14,12 @@
 
 require_once 'db.php';
 
-// ── Only allow POST requests ──────────────────────────────────
+// ── Allow preflight OPTIONS requests and require POST for login ───
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    respond(['success' => true, 'message' => 'OK']);
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     respond(['success' => false, 'message' => 'Invalid request method.']);
 }

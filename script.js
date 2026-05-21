@@ -12,8 +12,16 @@
    CONSTANTS & STATE
 ══════════════════════════════════════════════════════ */
 
-// Base path to all PHP API files
-const API = 'api/';
+// Base path to all PHP API files. Uses the current page location so requests resolve correctly
+// when the app is served from XAMPP under a project folder.
+const API = (() => {
+  if (window.location.protocol === 'file:') {
+    return 'api/';
+  }
+
+  const basePath = window.location.pathname.replace(/\/[^/]*$/, '/');
+  return `${window.location.origin}${basePath}api/`;
+})();
 
 // Password validation regex (same rule as MP4)
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
@@ -40,6 +48,7 @@ let SESSION = null; // current logged-in user object (from PHP session)
 async function fetchAPI(endpoint, method = 'GET', body = null) {
   const options = {
     method,
+    mode: 'cors',
     credentials: 'same-origin', // sends the PHP session cookie automatically
     headers: { 'Content-Type': 'application/json' },
   };

@@ -17,10 +17,16 @@ define('DB_NAME',     'ite193_store'); // The database we created
 
 // ── Allow cross-origin requests from the same server ─────────
 // (needed when the HTML and PHP are both on localhost)
-header('Access-Control-Allow-Origin: *');
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+} else {
+    header('Access-Control-Allow-Origin: *');
+}
+header('Access-Control-Allow-Credentials: true');
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 // Handle pre-flight OPTIONS request (sent by browsers before POST)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
