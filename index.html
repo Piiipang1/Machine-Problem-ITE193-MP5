@@ -1,12 +1,11 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="ITE193 Student Portal – Login, Register, and Manage your Account." />
-  <title>ITE193 Portal | Student Account System</title>
+  <meta name="description" content="ITE193 Product Inventory Management System – Login, Browse, Manage Inventory, and Place Orders." />
+  <title>ITE193 Portal | Product Inventory Management</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
@@ -31,9 +30,10 @@
       <button class="nav-btn active" id="navLogin" onclick="showSection('login')">Login</button>
       <button class="nav-btn" id="navRegister" onclick="showSection('register')">Register</button>
     </div>
-    <!-- Logged-in nav buttons (hidden by default) -->
+    <!-- Logged-in nav buttons -->
     <div class="nav-user" id="navUser" style="display:none;">
       <span class="nav-welcome" id="navWelcomeText"></span>
+      <span class="role-badge hidden" id="navRoleBadge">👑 Admin</span>
       <button class="nav-btn" onclick="showSection('changepass')">Change Password</button>
       <button class="nav-btn danger" onclick="logout()">Logout</button>
     </div>
@@ -45,10 +45,10 @@
     <!-- ═══ HERO (shown when not logged in) ═══════════════ -->
     <section class="hero" id="heroSection">
       <div class="hero-text">
-        <h1 class="hero-title">Student Account<br><span class="gradient-text">Management System</span></h1>
+        <h1 class="hero-title">Product Inventory<br><span class="gradient-text">Management System</span></h1>
         <p class="hero-subtitle">ITE193 — Event Driven Programming</p>
-        <p class="hero-desc">Securely manage your student profile, authenticate your identity, and update your
-          credentials all in one place.</p>
+        <p class="hero-desc">Manage your Sari-Sari Store inventory, browse products, and place orders — all in one
+          place.</p>
       </div>
     </section>
 
@@ -169,7 +169,8 @@
             <label for="regConfirm">Confirm Password <span class="required">*</span></label>
             <div class="input-wrapper">
               <span class="input-icon">🔒</span>
-              <input type="password" id="regConfirm" placeholder="Re-enter your password" autocomplete="new-password" />
+              <input type="password" id="regConfirm" placeholder="Re-enter your password"
+                autocomplete="new-password" />
               <button class="toggle-pass" onclick="togglePassword('regConfirm', this)" type="button"
                 title="Show/Hide password">👁</button>
             </div>
@@ -199,10 +200,48 @@
           <button class="dash-tab" id="tabBtnCart" onclick="showDashTab('cart')">🛒 Cart <span class="cart-badge"
               id="cartBadge">0</span></button>
           <button class="dash-tab" id="tabBtnOrders" onclick="showDashTab('orders')">📋 Orders</button>
+          <!-- Admin-only Inventory tab -->
+          <button class="dash-tab hidden" id="tabBtnInventory" onclick="showDashTab('inventory')">📦
+            Inventory</button>
         </div>
 
-        <!-- Tab Content: PROFILE -->
+        <!-- ─── Tab Content: PROFILE ─────────────────────── -->
         <div class="dash-content" id="tabProfile">
+
+          <!-- Stat Cards (top row) -->
+          <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+              <div class="stat-icon">📦</div>
+              <div class="stat-body">
+                <div class="stat-value" id="statOrders">—</div>
+                <div class="stat-label">Orders Placed</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div class="stat-body">
+                <div class="stat-value" id="statSpent">—</div>
+                <div class="stat-label">Total Spent</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🛍️</div>
+              <div class="stat-body">
+                <div class="stat-value" id="statItems">—</div>
+                <div class="stat-label">Items Purchased</div>
+              </div>
+            </div>
+            <!-- Admin-only 4th stat card -->
+            <div class="stat-card hidden admin-only-stat" id="statCardInventory">
+              <div class="stat-icon">🏪</div>
+              <div class="stat-body">
+                <div class="stat-value" id="statInventoryValue">—</div>
+                <div class="stat-label">Inventory Value</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile & Welcome -->
           <div class="dashboard-grid">
 
             <!-- Welcome Card -->
@@ -239,25 +278,59 @@
                   <span class="profile-label">Username</span>
                   <span class="profile-value" id="infoUsername"></span>
                 </div>
+                <div class="profile-row">
+                  <span class="profile-label">Role</span>
+                  <span class="profile-value" id="infoRole"></span>
+                </div>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- Tab Content: STORE -->
+        <!-- ─── Tab Content: STORE ───────────────────────── -->
         <div class="dash-content hidden" id="tabStore">
           <div class="store-header">
             <div class="card-icon">🏪</div>
-            <h2>Sari-Sari Store Inventory</h2>
-            <p>Browse and add products to your cart</p>
+            <div>
+              <h2>Sari-Sari Store Inventory</h2>
+              <p>Browse and add products to your cart</p>
+            </div>
           </div>
+
+          <!-- Search + Filter Bar -->
+          <div class="store-controls">
+            <div class="search-bar-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="storeSearch" class="search-input" placeholder="Search products..."
+                oninput="filterProducts()" />
+            </div>
+            <select id="categoryFilter" class="category-select" onchange="filterProducts()">
+              <option value="">All Categories</option>
+              <option value="Noodles &amp; Instant Food">Noodles &amp; Instant Food</option>
+              <option value="Seasoning &amp; Condiments">Seasoning &amp; Condiments</option>
+              <option value="Snacks &amp; Biscuits">Snacks &amp; Biscuits</option>
+              <option value="Beverages">Beverages</option>
+              <option value="Dairy &amp; Milk">Dairy &amp; Milk</option>
+              <option value="Personal Care">Personal Care</option>
+              <option value="Tobacco">Tobacco</option>
+              <option value="Candy &amp; Sweets">Candy &amp; Sweets</option>
+              <option value="Canned Goods">Canned Goods</option>
+              <option value="Chocolate &amp; Drinks">Chocolate &amp; Drinks</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
           <div class="products-grid" id="productsGrid">
             <!-- Products injected here via JS -->
           </div>
+          <div class="no-results hidden" id="noResultsMsg">
+            <div class="empty-icon">🔍</div>
+            <p>No products match your search.</p>
+          </div>
         </div>
 
-        <!-- Tab Content: CART -->
+        <!-- ─── Tab Content: CART ────────────────────────── -->
         <div class="dash-content hidden" id="tabCart">
           <div class="cart-header">
             <div class="card-icon">🛒</div>
@@ -301,15 +374,103 @@
           </div>
         </div>
 
-        <!-- Tab Content: ORDER HISTORY -->
+        <!-- ─── Tab Content: ORDER HISTORY ──────────────── -->
         <div class="dash-content hidden" id="tabOrders">
           <div class="store-header">
             <div class="card-icon">📋</div>
-            <h2>Order History</h2>
-            <p>Your past purchases from the Sari-Sari Store</p>
+            <div>
+              <h2>Order History</h2>
+              <p>Your past purchases from the Sari-Sari Store</p>
+            </div>
           </div>
           <div id="ordersContainer">
             <!-- Orders injected here via JS -->
+          </div>
+        </div>
+
+        <!-- ─── Tab Content: INVENTORY (Admin Only) ──────── -->
+        <div class="dash-content hidden" id="tabInventory">
+          <div class="store-header">
+            <div class="card-icon">📦</div>
+            <div>
+              <h2>Product Inventory</h2>
+              <p>Add, edit, restock, and delete products</p>
+            </div>
+            <button class="btn-primary" id="addProductBtn" onclick="openAddProductModal()"
+              style="margin-left:auto; white-space:nowrap;">
+              <span>➕ Add Product</span>
+            </button>
+          </div>
+
+          <!-- Inventory Summary Stats -->
+          <div class="inv-stats-row" id="invStatsRow">
+            <div class="inv-stat-pill" id="invStatTotal">
+              <span class="inv-stat-num">—</span>
+              <span class="inv-stat-lbl">Products</span>
+            </div>
+            <div class="inv-stat-pill" id="invStatStock">
+              <span class="inv-stat-num">—</span>
+              <span class="inv-stat-lbl">Total Units</span>
+            </div>
+            <div class="inv-stat-pill warning" id="invStatLow">
+              <span class="inv-stat-num">—</span>
+              <span class="inv-stat-lbl">Low Stock</span>
+            </div>
+            <div class="inv-stat-pill danger" id="invStatOOS">
+              <span class="inv-stat-num">—</span>
+              <span class="inv-stat-lbl">Out of Stock</span>
+            </div>
+            <div class="inv-stat-pill success" id="invStatValue">
+              <span class="inv-stat-num">—</span>
+              <span class="inv-stat-lbl">Inventory Value</span>
+            </div>
+          </div>
+
+          <!-- Inventory Search -->
+          <div class="store-controls" style="margin-bottom:1rem;">
+            <div class="search-bar-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="invSearch" class="search-input" placeholder="Search inventory..."
+                oninput="filterInventoryTable()" />
+            </div>
+            <select id="invCategoryFilter" class="category-select" onchange="filterInventoryTable()">
+              <option value="">All Categories</option>
+              <option value="Noodles &amp; Instant Food">Noodles &amp; Instant Food</option>
+              <option value="Seasoning &amp; Condiments">Seasoning &amp; Condiments</option>
+              <option value="Snacks &amp; Biscuits">Snacks &amp; Biscuits</option>
+              <option value="Beverages">Beverages</option>
+              <option value="Dairy &amp; Milk">Dairy &amp; Milk</option>
+              <option value="Personal Care">Personal Care</option>
+              <option value="Tobacco">Tobacco</option>
+              <option value="Candy &amp; Sweets">Candy &amp; Sweets</option>
+              <option value="Canned Goods">Canned Goods</option>
+              <option value="Chocolate &amp; Drinks">Chocolate &amp; Drinks</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
+          <!-- Inventory Table -->
+          <div class="inv-table-wrapper glass">
+            <table class="inv-table" id="inventoryTable">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Sold</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <!-- Rows injected via JS -->
+              </tbody>
+            </table>
+            <div class="empty-cart-msg hidden" id="invEmptyMsg">
+              <div class="empty-icon">📦</div>
+              <p>No products found.</p>
+            </div>
           </div>
         </div>
 
@@ -382,407 +543,239 @@
 
   <!-- ─── FOOTER ─────────────────────────────────────────── -->
   <footer class="footer">
-    <p>ITE193 — Event Driven Programming &nbsp;|&nbsp; AY 2025–2026</p>
+    <p>ITE193 — Event Driven Programming &nbsp;|&nbsp; Product Inventory Management System &nbsp;|&nbsp; AY 2025–2026</p>
   </footer>
 
   <!-- ─── TOAST NOTIFICATION ────────────────────────────── -->
   <div class="toast" id="toast"></div>
 
-  <script src="script.js"></script>
-</body>
-
-=======
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="ITE193 Student Portal – Login, Register, and Manage your Account." />
-  <title>ITE193 Portal | Student Account System</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-</head>
-
-<body>
-
-  <!-- ─── PARTICLES BACKGROUND ─────────────────────────── -->
-  <div class="particles" id="particles"></div>
-
-  <!-- ─── TOP NAVBAR ────────────────────────────────────── -->
-  <nav class="navbar" id="mainNav">
-    <div class="nav-brand">
-      <div class="brand-logo">
-        <span class="logo-icon">⚡</span>
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL: ADD PRODUCT
+  ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modalAddProduct" onclick="closeModalOnOverlay(event, 'modalAddProduct')">
+    <div class="modal-box glass">
+      <div class="modal-header">
+        <div class="card-icon sm">➕</div>
+        <h3>Add New Product</h3>
+        <button class="modal-close" onclick="closeModal('modalAddProduct')">✕</button>
       </div>
-      <span class="brand-name">ITE193 Portal</span>
-    </div>
-    <div class="nav-actions" id="navActions">
-      <button class="nav-btn active" id="navLogin" onclick="showSection('login')">Login</button>
-      <button class="nav-btn" id="navRegister" onclick="showSection('register')">Register</button>
-    </div>
-    <!-- Logged-in nav buttons (hidden by default) -->
-    <div class="nav-user" id="navUser" style="display:none;">
-      <span class="nav-welcome" id="navWelcomeText"></span>
-      <button class="nav-btn" onclick="showSection('changepass')">Change Password</button>
-      <button class="nav-btn danger" onclick="logout()">Logout</button>
-    </div>
-  </nav>
-
-  <!-- ─── MAIN CONTENT WRAPPER ──────────────────────────── -->
-  <main class="main-content">
-
-    <!-- ═══ HERO (shown when not logged in) ═══════════════ -->
-    <section class="hero" id="heroSection">
-      <div class="hero-text">
-        <h1 class="hero-title">Student Account<br><span class="gradient-text">Management System</span></h1>
-        <p class="hero-subtitle">ITE193 — Event Driven Programming</p>
-        <p class="hero-desc">Securely manage your student profile, authenticate your identity, and update your
-          credentials all in one place.</p>
-      </div>
-    </section>
-
-    <!-- ═══ LOGIN SECTION ══════════════════════════════════ -->
-    <section class="card-section" id="loginSection">
-      <div class="card glass" id="loginCard">
-        <div class="card-header">
-          <div class="card-icon">🔐</div>
-          <h2>Welcome Back</h2>
-          <p>Sign in to your account</p>
-        </div>
-
-        <div class="form-group">
-          <label for="loginUsername">Username</label>
-          <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input type="text" id="loginUsername" placeholder="Enter your username" autocomplete="username" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="loginPassword">Password</label>
-          <div class="input-wrapper">
-            <span class="input-icon">🔒</span>
-            <input type="password" id="loginPassword" placeholder="Enter your password"
-              autocomplete="current-password" />
-            <button class="toggle-pass" onclick="togglePassword('loginPassword', this)" type="button"
-              title="Show/Hide password">👁</button>
-          </div>
-        </div>
-
-        <div class="msg-box" id="loginMsg"></div>
-
-        <button class="btn-primary full-width" id="loginBtn" onclick="login()">
-          <span>Login</span>
-          <span class="btn-arrow">→</span>
-        </button>
-
-        <p class="switch-link">Don't have an account? <a href="#" onclick="showSection('register')">Create one</a></p>
-      </div>
-    </section>
-
-    <!-- ═══ REGISTER SECTION ════════════════════════════════ -->
-    <section class="card-section hidden" id="registerSection">
-      <div class="card glass wide-card" id="registerCard">
-        <div class="card-header">
-          <div class="card-icon">📝</div>
-          <h2>Create Account</h2>
-          <p>Fill in your details to register</p>
-        </div>
-
+      <div class="modal-body">
         <div class="form-grid">
-
           <div class="form-group">
-            <label for="regFirst">First Name <span class="required">*</span></label>
+            <label for="addCode">Product Code <span class="required">*</span></label>
             <div class="input-wrapper">
-              <span class="input-icon">✏️</span>
-              <input type="text" id="regFirst" placeholder="e.g. Maria" />
+              <span class="input-icon">🏷️</span>
+              <input type="text" id="addCode" placeholder="e.g. SS024" />
             </div>
           </div>
-
           <div class="form-group">
-            <label for="regMiddle">Middle Name</label>
+            <label for="addImage">Icon (Emoji)</label>
             <div class="input-wrapper">
-              <span class="input-icon">✏️</span>
-              <input type="text" id="regMiddle" placeholder="e.g. Santos" />
+              <span class="input-icon">🖼️</span>
+              <input type="text" id="addImage" placeholder="e.g. 🍎" maxlength="4" value="📦" />
             </div>
           </div>
-
-          <div class="form-group">
-            <label for="regLast">Last Name <span class="required">*</span></label>
-            <div class="input-wrapper">
-              <span class="input-icon">✏️</span>
-              <input type="text" id="regLast" placeholder="e.g. Reyes" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="regEmail">Email Address <span class="required">*</span></label>
-            <div class="input-wrapper">
-              <span class="input-icon">📧</span>
-              <input type="email" id="regEmail" placeholder="e.g. student@ite.edu" />
-            </div>
-          </div>
-
           <div class="form-group full-col">
-            <label for="regAddress">Address <span class="required">*</span></label>
+            <label for="addName">Product Name <span class="required">*</span></label>
             <div class="input-wrapper">
-              <span class="input-icon">📍</span>
-              <input type="text" id="regAddress" placeholder="e.g. 123 Rizal St., Davao City" />
+              <span class="input-icon">📝</span>
+              <input type="text" id="addName" placeholder="e.g. Piattos Cheese Chips" />
             </div>
           </div>
-
           <div class="form-group">
-            <label for="regUsername">Username <span class="required">*</span></label>
+            <label for="addCategory">Category <span class="required">*</span></label>
             <div class="input-wrapper">
-              <span class="input-icon">👤</span>
-              <input type="text" id="regUsername" placeholder="Choose a username" autocomplete="username" />
+              <span class="input-icon">📂</span>
+              <select id="addCategory" class="modal-select">
+                <option value="General">General</option>
+                <option value="Noodles &amp; Instant Food">Noodles &amp; Instant Food</option>
+                <option value="Seasoning &amp; Condiments">Seasoning &amp; Condiments</option>
+                <option value="Snacks &amp; Biscuits">Snacks &amp; Biscuits</option>
+                <option value="Beverages">Beverages</option>
+                <option value="Dairy &amp; Milk">Dairy &amp; Milk</option>
+                <option value="Personal Care">Personal Care</option>
+                <option value="Tobacco">Tobacco</option>
+                <option value="Candy &amp; Sweets">Candy &amp; Sweets</option>
+                <option value="Canned Goods">Canned Goods</option>
+                <option value="Chocolate &amp; Drinks">Chocolate &amp; Drinks</option>
+              </select>
             </div>
           </div>
-
           <div class="form-group">
-            <label for="regPassword">Password <span class="required">*</span></label>
+            <label for="addPrice">Unit Price (₱) <span class="required">*</span></label>
             <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
-              <input type="password" id="regPassword" placeholder="Min 8 chars, A-Z, a-z, symbol"
-                oninput="checkStrength(this.value)" autocomplete="new-password" />
-              <button class="toggle-pass" onclick="togglePassword('regPassword', this)" type="button"
-                title="Show/Hide password">👁</button>
+              <span class="input-icon">💵</span>
+              <input type="number" id="addPrice" placeholder="e.g. 25.00" min="0.01" step="0.01" />
             </div>
-            <div class="strength-bar-container">
-              <div class="strength-bar" id="strengthBar"></div>
-            </div>
-            <span class="strength-label" id="strengthLabel"></span>
           </div>
-
           <div class="form-group">
-            <label for="regConfirm">Confirm Password <span class="required">*</span></label>
+            <label for="addQty">Initial Stock <span class="required">*</span></label>
             <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
-              <input type="password" id="regConfirm" placeholder="Re-enter your password" autocomplete="new-password" />
-              <button class="toggle-pass" onclick="togglePassword('regConfirm', this)" type="button"
-                title="Show/Hide password">👁</button>
+              <span class="input-icon">📊</span>
+              <input type="number" id="addQty" placeholder="e.g. 50" min="0" step="1" />
             </div>
           </div>
-
-        </div>
-
-        <div class="msg-box" id="registerMsg"></div>
-
-        <button class="btn-primary full-width" id="registerBtn" onclick="register()">
-          <span>Create Account</span>
-          <span class="btn-arrow">→</span>
-        </button>
-
-        <p class="switch-link">Already have an account? <a href="#" onclick="showSection('login')">Sign in</a></p>
-      </div>
-    </section>
-
-    <!-- ═══ DASHBOARD (logged in) ═══════════════════════════ -->
-    <section class="card-section hidden" id="dashboardSection">
-      <div class="dashboard-container">
-
-        <!-- Dashboard Tabs -->
-        <div class="dashboard-tabs">
-          <button class="dash-tab active" id="tabBtnProfile" onclick="showDashTab('profile')">👤 Profile</button>
-          <button class="dash-tab" id="tabBtnStore" onclick="showDashTab('store')">🏪 Store</button>
-          <button class="dash-tab" id="tabBtnCart" onclick="showDashTab('cart')">🛒 Cart <span class="cart-badge"
-              id="cartBadge">0</span></button>
-          <button class="dash-tab" id="tabBtnOrders" onclick="showDashTab('orders')">📋 Orders</button>
-        </div>
-
-        <!-- Tab Content: PROFILE -->
-        <div class="dash-content" id="tabProfile">
-          <div class="dashboard-grid">
-
-            <!-- Welcome Card -->
-            <div class="card glass dashboard-welcome">
-              <div class="welcome-avatar" id="welcomeAvatar"></div>
-              <h2 id="welcomeName"></h2>
-              <p id="welcomeUsername" class="welcome-sub"></p>
-              <div class="profile-badges">
-                <span class="badge" id="profileEmail"></span>
-                <span class="badge address-badge" id="profileAddress"></span>
-              </div>
-            </div>
-
-            <!-- Profile Details Card -->
-            <div class="card glass profile-details">
-              <div class="card-header small-header">
-                <div class="card-icon sm">👤</div>
-                <h3>Profile Information</h3>
-              </div>
-              <div class="profile-table">
-                <div class="profile-row">
-                  <span class="profile-label">Full Name</span>
-                  <span class="profile-value" id="infoFullName"></span>
-                </div>
-                <div class="profile-row">
-                  <span class="profile-label">Email</span>
-                  <span class="profile-value" id="infoEmail"></span>
-                </div>
-                <div class="profile-row">
-                  <span class="profile-label">Address</span>
-                  <span class="profile-value" id="infoAddress"></span>
-                </div>
-                <div class="profile-row">
-                  <span class="profile-label">Username</span>
-                  <span class="profile-value" id="infoUsername"></span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Tab Content: STORE -->
-        <div class="dash-content hidden" id="tabStore">
-          <div class="store-header">
-            <div class="card-icon">🏪</div>
-            <h2>Sari-Sari Store Inventory</h2>
-            <p>Browse and add products to your cart</p>
-          </div>
-          <div class="products-grid" id="productsGrid">
-            <!-- Products injected here via JS -->
-          </div>
-        </div>
-
-        <!-- Tab Content: CART -->
-        <div class="dash-content hidden" id="tabCart">
-          <div class="cart-header">
-            <div class="card-icon">🛒</div>
-            <h2>Your Shopping Cart</h2>
-            <button class="btn-clear-cart" id="clearCartBtn" onclick="clearCart()" style="display:none;">🗑️ Clear
-              Cart</button>
-          </div>
-
-          <div class="cart-table-wrapper glass">
-            <table class="cart-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Qty</th>
-                  <th>Subtotal</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="cartTableBody">
-                <!-- Cart items injected here -->
-              </tbody>
-            </table>
-
-            <div class="empty-cart-msg" id="emptyCartMsg">
-              <div class="empty-icon">🛒</div>
-              <p>Your cart is empty.</p>
-              <button class="btn-secondary mt-1" onclick="showDashTab('store')">Browse Store</button>
-            </div>
-          </div>
-
-          <div class="cart-summary glass" id="cartSummary" style="display:none;">
-            <div class="cart-total">
-              <span>Total Amount:</span>
-              <span class="total-amount" id="cartTotalValue">₱0.00</span>
-            </div>
-            <button class="btn-primary" id="checkoutBtn" onclick="checkout()">
-              <span>Checkout</span>
-              <span class="btn-arrow">→</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Tab Content: ORDER HISTORY -->
-        <div class="dash-content hidden" id="tabOrders">
-          <div class="store-header">
-            <div class="card-icon">📋</div>
-            <h2>Order History</h2>
-            <p>Your past purchases from the Sari-Sari Store</p>
-          </div>
-          <div id="ordersContainer">
-            <!-- Orders injected here via JS -->
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ═══ CHANGE PASSWORD SECTION ═════════════════════════ -->
-    <section class="card-section hidden" id="changepassSection">
-      <div class="card glass" id="changepassCard">
-        <div class="card-header position-relative">
-          <button class="btn-back" onclick="showSection('dashboard')" title="Back to Dashboard">
-            <span class="back-icon">←</span> Back
-          </button>
-          <div class="card-icon">🔑</div>
-          <h2>Change Password</h2>
-          <p>Update your account password</p>
-        </div>
-
-        <div class="login-required-banner hidden" id="loginRequiredBanner">
-          <span>⚠️</span>
-          <span>You must be <strong>logged in</strong> to change your password.</span>
-          <a href="#" onclick="showSection('login')">Login now →</a>
-        </div>
-
-        <div id="changePassForm">
-          <div class="form-group">
-            <label for="cpCurrent">Current Password <span class="required">*</span></label>
+          <div class="form-group full-col">
+            <label for="addDesc">Description</label>
             <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
-              <input type="password" id="cpCurrent" placeholder="Enter your current password"
-                autocomplete="current-password" />
-              <button class="toggle-pass" onclick="togglePassword('cpCurrent', this)" type="button">👁</button>
+              <span class="input-icon">💬</span>
+              <input type="text" id="addDesc" placeholder="Short product description (optional)" />
             </div>
           </div>
-
-          <div class="form-group">
-            <label for="cpNew">New Password <span class="required">*</span></label>
-            <div class="input-wrapper">
-              <span class="input-icon">🔑</span>
-              <input type="password" id="cpNew" placeholder="Min 8 chars, A-Z, a-z, symbol"
-                oninput="checkStrength(this.value, 'cpStrengthBar', 'cpStrengthLabel')" autocomplete="new-password" />
-              <button class="toggle-pass" onclick="togglePassword('cpNew', this)" type="button">👁</button>
-            </div>
-            <div class="strength-bar-container">
-              <div class="strength-bar" id="cpStrengthBar"></div>
-            </div>
-            <span class="strength-label" id="cpStrengthLabel"></span>
-          </div>
-
-          <div class="form-group">
-            <label for="cpConfirm">Confirm New Password <span class="required">*</span></label>
-            <div class="input-wrapper">
-              <span class="input-icon">🔑</span>
-              <input type="password" id="cpConfirm" placeholder="Re-enter new password" autocomplete="new-password" />
-              <button class="toggle-pass" onclick="togglePassword('cpConfirm', this)" type="button">👁</button>
-            </div>
-          </div>
-
-          <div class="msg-box" id="cpMsg"></div>
-
-          <button class="btn-primary full-width" id="cpBtn" onclick="changePassword()">
-            <span>Update Password</span>
+        </div>
+        <div class="msg-box" id="addProductMsg"></div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('modalAddProduct')">Cancel</button>
+          <button class="btn-primary" id="addProductSubmitBtn" onclick="submitAddProduct()">
+            <span>Add Product</span>
             <span class="btn-arrow">→</span>
           </button>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-  </main>
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL: EDIT PRODUCT
+  ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modalEditProduct" onclick="closeModalOnOverlay(event, 'modalEditProduct')">
+    <div class="modal-box glass">
+      <div class="modal-header">
+        <div class="card-icon sm">✏️</div>
+        <h3>Edit Product</h3>
+        <button class="modal-close" onclick="closeModal('modalEditProduct')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId" />
+        <div class="form-group">
+          <label>Product Code</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🏷️</span>
+            <input type="text" id="editCode" disabled class="input-disabled" />
+          </div>
+          <span class="field-hint">Code cannot be changed after creation.</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="editImage">Icon (Emoji)</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🖼️</span>
+              <input type="text" id="editImage" maxlength="4" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editCategory">Category</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📂</span>
+              <select id="editCategory" class="modal-select">
+                <option value="General">General</option>
+                <option value="Noodles &amp; Instant Food">Noodles &amp; Instant Food</option>
+                <option value="Seasoning &amp; Condiments">Seasoning &amp; Condiments</option>
+                <option value="Snacks &amp; Biscuits">Snacks &amp; Biscuits</option>
+                <option value="Beverages">Beverages</option>
+                <option value="Dairy &amp; Milk">Dairy &amp; Milk</option>
+                <option value="Personal Care">Personal Care</option>
+                <option value="Tobacco">Tobacco</option>
+                <option value="Candy &amp; Sweets">Candy &amp; Sweets</option>
+                <option value="Canned Goods">Canned Goods</option>
+                <option value="Chocolate &amp; Drinks">Chocolate &amp; Drinks</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group full-col">
+            <label for="editName">Product Name <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">📝</span>
+              <input type="text" id="editName" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editPrice">Unit Price (₱) <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <span class="input-icon">💵</span>
+              <input type="number" id="editPrice" min="0.01" step="0.01" />
+            </div>
+          </div>
+          <div class="form-group full-col">
+            <label for="editDesc">Description</label>
+            <div class="input-wrapper">
+              <span class="input-icon">💬</span>
+              <input type="text" id="editDesc" />
+            </div>
+          </div>
+        </div>
+        <div class="msg-box" id="editProductMsg"></div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('modalEditProduct')">Cancel</button>
+          <button class="btn-primary" id="editProductSubmitBtn" onclick="submitEditProduct()">
+            <span>Save Changes</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <!-- ─── FOOTER ─────────────────────────────────────────── -->
-  <footer class="footer">
-    <p>ITE193 — Event Driven Programming &nbsp;|&nbsp; AY 2025–2026</p>
-  </footer>
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL: ADD STOCK
+  ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modalAddStock" onclick="closeModalOnOverlay(event, 'modalAddStock')">
+    <div class="modal-box modal-sm glass">
+      <div class="modal-header">
+        <div class="card-icon sm">📥</div>
+        <h3>Add Stock</h3>
+        <button class="modal-close" onclick="closeModal('modalAddStock')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="stockProductId" />
+        <p class="modal-product-label" id="stockProductName"></p>
+        <div class="stock-current" id="stockCurrentDisplay"></div>
+        <div class="form-group" style="margin-top:1rem;">
+          <label for="stockQtyAdd">Quantity to Add <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <span class="input-icon">➕</span>
+            <input type="number" id="stockQtyAdd" placeholder="e.g. 20" min="1" step="1" />
+          </div>
+        </div>
+        <div class="msg-box" id="addStockMsg"></div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('modalAddStock')">Cancel</button>
+          <button class="btn-primary" id="addStockSubmitBtn" onclick="submitAddStock()">
+            <span>Add Stock</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <!-- ─── TOAST NOTIFICATION ────────────────────────────── -->
-  <div class="toast" id="toast"></div>
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL: CONFIRM DELETE
+  ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modalConfirmDelete"
+    onclick="closeModalOnOverlay(event, 'modalConfirmDelete')">
+    <div class="modal-box modal-sm glass">
+      <div class="modal-header danger-header">
+        <div class="card-icon sm">🗑️</div>
+        <h3>Delete Product</h3>
+        <button class="modal-close" onclick="closeModal('modalConfirmDelete')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="deleteProductId" />
+        <p class="delete-confirm-text">Are you sure you want to delete <strong id="deleteProductName"></strong>?</p>
+        <p class="delete-warn">⚠️ This action cannot be undone. Products with existing orders cannot be deleted.</p>
+        <div class="msg-box" id="deleteProductMsg"></div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('modalConfirmDelete')">Cancel</button>
+          <button class="btn-danger" id="deleteSubmitBtn" onclick="deleteProduct()">
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
 
->>>>>>> 8c4abea5e44cdee9cba1d330ecc8aaca970f123f
 </html>
