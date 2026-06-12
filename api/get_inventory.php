@@ -33,7 +33,6 @@ $result = $conn->query(
         p.unit_price,
         p.image,
         p.date_added,
-        p.updated_at,
         COALESCE(SUM(oi.qty), 0) AS times_sold
      FROM products p
      LEFT JOIN order_items oi ON oi.product_code = p.code
@@ -58,7 +57,6 @@ while ($row = $result->fetch_assoc()) {
         'unitPrice'   => (float)$row['unit_price'],
         'image'       => $row['image'],
         'date_added'  => $row['date_added'],
-        'updated_at'  => $row['updated_at'],
         'times_sold'  => (int)$row['times_sold'],
     ];
 }
