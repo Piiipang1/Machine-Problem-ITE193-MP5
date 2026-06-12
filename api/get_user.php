@@ -21,7 +21,7 @@ if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
     $userId = $_SESSION['user']['id'];
 
     $stmt = $conn->prepare(
-        'SELECT id, username, first_name, middle_name, last_name, address, email
+        'SELECT id, username, first_name, middle_name, last_name, address, email, role
          FROM users
          WHERE id = ?
          LIMIT 1'
