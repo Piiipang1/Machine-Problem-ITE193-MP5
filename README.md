@@ -38,3 +38,14 @@ The system provides student account management and sari-sari store operations in
 - MySQL Database
 - Persistent Data Storage
 - CRUD Operations
+
+
+## Technologies Used
+
+- HTML5
+- CSS3
+- JavaScript
+- PHP
+- MySQL
+- XAMPP
+- Event-Driven Programming
