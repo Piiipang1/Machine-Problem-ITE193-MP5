@@ -49,3 +49,13 @@ The system provides student account management and sari-sari store operations in
 - MySQL
 - XAMPP
 - Event-Driven Programming
+
+## Installation
+
+1. Clone the repository.
+2. Move the project folder into the XAMPP htdocs directory.
+3. Start Apache and MySQL using XAMPP.
+4. Import the provided SQL file into phpMyAdmin.
+5. Access the system through:
+
+http://localhost/ITE193_INDANAN_FOURTH/
